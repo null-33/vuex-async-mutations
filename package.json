@@ -1,0 +1,30 @@
+{
+  "name": "vuex-async-mutations",
+  "version": "1.0.0",
+  "description": "A vuex plugin/extension to easily bind PromiseLike states to mutations",
+  "main": "lib/index.js",
+  "types": "types/index.d.ts",
+  "author": "David Hoevers",
+  "license": "MIT",
+  "files": [
+    "lib/**/*",
+    "types/index.d.ts",
+    "types/vuex.d.ts"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "private": false,
+  "dependencies": {
+    "vue": "^2.6.11",
+    "vuex": "^3.1.2"
+  },
+  "devDependencies": {
+    "prettier": "^1.19.1",
+    "tslint": "^6.0.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.7.5"
+  }
+}
