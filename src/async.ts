@@ -10,6 +10,7 @@ import {
   AsyncActionHandler,
   AsyncAction,
   AsyncMutationTree,
+  AsyncActionHandlerTree,
 } from '../types';
 
 export function commitAsync(commit: Commit, defaultType: string = 'async'): CommitAsync {
@@ -55,6 +56,16 @@ export function wrapAction<S, R>(
   };
 }
 
+export function wrapActions<S, R>(tree: AsyncActionHandlerTree<S, R>): ActionTree<S, R> {
+  return Object.keys(tree).reduce(
+    (actions, key) => ({
+      ...actions,
+      ...wrapAction(tree[key], key),
+    }),
+    {} as ActionTree<S, R>,
+  );
+}
+
 function stateMutation<S>(mutation?: StateMutation<S>, metaOnly?: boolean): Mutation<S> {
   return (state: S, { payload, meta }: { payload: any; meta?: any }) => {
     if (metaOnly) {
@@ -74,7 +85,7 @@ export function wrapMutation<S>(type: string, mutation: AsyncMutation<S>): Mutat
   };
 }
 
-export function wrapMutationTree<S>(tree: AsyncMutationTree<S>): MutationTree<S> {
+export function wrapMutations<S>(tree: AsyncMutationTree<S>): MutationTree<S> {
   return Object.keys(tree).reduce(
     (mutations, key) => ({
       ...mutations,
@@ -105,7 +116,7 @@ export function wrapModule<S, R>(mod: AsyncModule<S, R>): Module<S, R> {
   }
 
   if (mod.mutationsAsync) {
-    bound.mutations = { ...bound.mutations, ...wrapMutationTree(mod.mutationsAsync) };
+    bound.mutations = { ...bound.mutations, ...wrapMutations(mod.mutationsAsync) };
   }
 
   return bound;
