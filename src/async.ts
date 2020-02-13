@@ -1,4 +1,4 @@
-import { Store, ActionHandler, MutationTree, Mutation, Commit } from 'vuex/types';
+import { Store, ActionHandler, MutationTree, Mutation, Commit, ModuleTree } from 'vuex/types';
 import { Module } from 'vuex/types';
 import module from './module';
 import {
@@ -109,4 +109,20 @@ export function asyncModule<S, R>(mod: AsyncModule<S, R>): Module<S, R> {
   }
 
   return bound;
+}
+
+export function wrapModules<R>(modules?: ModuleTree<R>): ModuleTree<R> | undefined {
+  if (!modules) return undefined;
+
+  return Object.keys(modules).reduce((mods, key) => {
+    let mod = modules[key] as AsyncModule<any, R>;
+
+    if (mod.async || mod.actionsAsync || mod.mutationsAsync) {
+      mod = asyncModule(mod);
+    }
+
+    mod.modules = wrapModules(mod.modules);
+
+    return { ...mods, [key]: mod };
+  }, {} as ModuleTree<R>)
 }

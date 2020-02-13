@@ -1,4 +1,4 @@
-import { Store, ActionContext, ActionHandler, Module, MutationTree } from 'vuex/types';
+import { Store, ActionContext, ActionHandler, Module, MutationTree, ModuleTree } from 'vuex/types';
 import _Vue from "vue";
 
 import './vuex';
@@ -20,6 +20,7 @@ export type AsyncActionContext<S, R> = ActionContext<S, R>  & {
 export type AsyncActionTree<S, R> = { [key: string]: AsyncAction<S, R> };
 
 export type AsyncModule<S, R> = Module<S, R> & {
+  readonly async?: boolean;
   actionsAsync?: AsyncActionTree<S, R>;
   mutationsAsync?: AsyncMutationTree<S>;
 }
@@ -57,7 +58,9 @@ export declare function asyncMutationTree<S>(tree: AsyncMutationTree<S>): Mutati
 
 export declare function asyncModule<S, R>(mod: AsyncModule<S, R>): Module<S, R>;
 
-export declare function plugin (store: Store<any>):void;
+export declare function plugin(store: Store<any>): void;
+
+export declare function wrapModules<R>(modules?: ModuleTree<R>): ModuleTree<R> | undefined;
 
 export declare const module: Module<AsyncState, any>;
 
