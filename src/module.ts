@@ -1,4 +1,5 @@
 import { AsyncState, AsyncModule } from '../types';
+import { wrapModule } from './async';
 
 const factory = (): AsyncState => ({
   pending: 0,
@@ -44,4 +45,4 @@ export const module = {
   },
 } as AsyncModule<AsyncState, any>;
 
-export default module;
+export default wrapModule(module);

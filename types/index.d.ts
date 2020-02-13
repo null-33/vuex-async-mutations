@@ -47,20 +47,20 @@ export type AsyncMutationTree<S> = {
   [key: string]: AsyncMutation<S>;
 }
 
-export declare function asyncAction<S, R>(
+export declare function wrapAction<S, R>(
   action: AsyncActionHandler<S, R>,
   defaultType?: string,
 ): ActionHandler<S, R>;
 
-export declare function asyncMutation<S>(type: string, mutation: AsyncMutation<S>): MutationTree<S>;
+export declare function wrapMutation<S>(type: string, mutation: AsyncMutation<S>): MutationTree<S>;
 
-export declare function asyncMutationTree<S>(tree: AsyncMutationTree<S>): MutationTree<S>;
+export declare function wrapMutationTree<S>(tree: AsyncMutationTree<S>): MutationTree<S>;
 
-export declare function asyncModule<S, R>(mod: AsyncModule<S, R>): Module<S, R>;
-
-export declare function plugin(store: Store<any>): void;
+export declare function wrapModule<S, R>(mod: AsyncModule<S, R>): Module<S, R>;
 
 export declare function wrapModules<R>(modules?: ModuleTree<R>): ModuleTree<R> | undefined;
+
+export declare function plugin(store: Store<any>): void;
 
 export declare const module: Module<AsyncState, any>;
 
