@@ -13,7 +13,7 @@ import {
   AsyncActionHandlerTree,
 } from '../types';
 
-export function commitAsync(commit: Commit, defaultType: string = 'async'): CommitAsync {
+export function commitAsync(commit: Commit, scope: string = 'async'): CommitAsync {
   return async function<T>(
     commitType: string | PromiseLike<T>,
     payload?: PromiseLike<T> | any,
@@ -22,7 +22,7 @@ export function commitAsync(commit: Commit, defaultType: string = 'async'): Comm
     if (typeof commitType !== 'string') {
       meta = payload;
       payload = commitType;
-      commitType = defaultType;
+      commitType = scope;
     }
 
     commit(`${commitType}:pending`, { meta });
@@ -44,15 +44,15 @@ export function commitAsync(commit: Commit, defaultType: string = 'async'): Comm
 
 export function wrapAction<S, R>(
   action: AsyncActionHandler<S, R>,
-  defaultType?: string,
+  scope?: string,
 ): ActionHandler<S, R> {
   return function(this: Store<R>, actionContext, payload?: any) {
     const context: AsyncActionContext<S, R> = {
       ...actionContext,
-      commitAsync: commitAsync(actionContext.commit, defaultType),
+      commitAsync: commitAsync(actionContext.commit, scope),
     };
 
-    return context.commitAsync('async', action.call(this, context, payload), undefined);
+    return context.commitAsync('async', action.call(this, context, payload));
   };
 }
 
@@ -96,30 +96,30 @@ export function wrapMutations<S>(tree: AsyncMutationTree<S>): MutationTree<S> {
 }
 
 export function wrapModule<S, R>(mod: AsyncModule<S, R>): Module<S, R> {
-  const bound: Module<S, R> = { ...mod };
+  const wrappedModule: Module<S, R> = { ...mod };
 
   if (mod.async) {
-    bound.modules = { ...bound.modules, async: module};
+    wrappedModule.modules = { ...wrappedModule.modules, async: module};
   }
 
   if (mod.actionsAsync) {
-    Object.keys(mod.actionsAsync).forEach(key => {
-      const action: AsyncAction<S, R> = mod.actionsAsync![key];
+    Object.keys(mod.actionsAsync).forEach(scope => {
+      const action: AsyncAction<S, R> = mod.actionsAsync![scope];
 
       if (typeof action !== 'function') {
-        bound.actions = { ...bound.actions, [key]: wrapAction(action.handler, key) };
-        bound.mutations = { ...bound.mutations, ...wrapMutation(key, action) };
+        wrappedModule.actions = { ...wrappedModule.actions, [scope]: wrapAction(action.handler as AsyncActionHandler<S, R>, scope) };
+        wrappedModule.mutations = { ...wrappedModule.mutations, ...wrapMutation(scope, action) };
       } else {
-        bound.actions = { ...bound.actions, [key]: wrapAction(action, key) };
+        wrappedModule.actions = { ...wrappedModule.actions, [scope]: wrapAction(action as AsyncActionHandler<S, R>, scope) };
       }
     });
   }
 
   if (mod.mutationsAsync) {
-    bound.mutations = { ...bound.mutations, ...wrapMutations(mod.mutationsAsync) };
+    wrappedModule.mutations = { ...wrappedModule.mutations, ...wrapMutations(mod.mutationsAsync) };
   }
 
-  return bound;
+  return wrappedModule;
 }
 
 export function wrapModules<R>(modules?: ModuleTree<R>): ModuleTree<R> | undefined {

@@ -20,22 +20,25 @@ export type AsyncMutationTree<S> = {
 
 export type CommitAsync = {
   <T>(type: string, payload: PromiseLike<T>, meta?: any): Promise<T>;
-  <T>(payload: PromiseLike<T>, meta?: any): Promise<T>;
 };
 
-export type AsyncActionContext<S, R> = ActionContext<S, R>  & {
-  commitAsync: CommitAsync;
+export type ScopedCommitAsync = CommitAsync & {
+  <T>(payload: PromiseLike<T>, meta?: any): Promise<T>;
 }
 
-export type AsyncActionHandler<S, R> = (
+export type AsyncActionContext<S, R, C extends CommitAsync = CommitAsync> = ActionContext<S, R>  & {
+  commitAsync: C;
+}
+
+export type AsyncActionHandler<S, R, C extends CommitAsync = CommitAsync> = (
   this: Store<R>,
-  injectee: AsyncActionContext<S, R>,
+  injectee: AsyncActionContext<S, R, C>,
   payload?: any,
 ) => PromiseLike<any>;
 
 export type AsyncAction<S, R> =
-  | AsyncActionHandler<S, R>
-  | (AsyncMutation<S> & { handler: AsyncActionHandler<S, R> });
+  | AsyncActionHandler<S, R, ScopedCommitAsync>
+  | (AsyncMutation<S> & { handler: AsyncActionHandler<S, R, ScopedCommitAsync> });
 
 export type AsyncActionTree<S, R> = { [key: string]: AsyncAction<S, R> };
 export type AsyncActionHandlerTree<S, R> = { [key: string]: AsyncActionHandler<S, R> };
@@ -48,7 +51,7 @@ export type AsyncModule<S, R> = Module<S, R> & {
 
 export type StateMutation<S> = (state: S, payload: any, meta?: any) => any;
 
-export declare function wrapAction<S, R>(action: AsyncActionHandler<S, R>, defaultType?: string): ActionHandler<S, R>;
+export declare function wrapAction<S, R>(action: AsyncActionHandler<S, R>): ActionHandler<S, R>;
 
 export declare function wrapActions<S, R>(tree: AsyncActionHandlerTree<S, R>): ActionTree<S, R>;
 
